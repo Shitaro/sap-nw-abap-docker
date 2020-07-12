@@ -1,4 +1,8 @@
-FROM opensuse:latest
+FROM opensuse/leap:latest
+
+COPY $PWD/NW752 /var/tmp/ABAP_Trial
+COPY $PWD/mock_hostname/ld.so.preload /etc/ld.so.preload
+COPY $PWD/mock_hostname/libmock_hostname.so /usr/local/lib64/libmock_hostname.so
 
 # Make sure we do not spend time preparing the OS
 # while the installation sources are not mounted.
@@ -26,7 +30,7 @@ ENV container docker
 # Install dependencies and configure systemd to start only the services we
 # need!
 RUN zypper refresh -y; zypper dup -y; \
-zypper --non-interactive install --replacefiles  systemd uuidd expect tcsh which iputils vim hostname tar net-tools iproute2 curl python-openssl python-pip; \
+zypper --non-interactive install --replacefiles  systemd uuidd expect tcsh which iputils vim hostname tar net-tools iproute2 curl python-openssl python-pip gzip libaio1; \
 zypper clean; \
 (cd /usr/lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
 rm -f /usr/lib/systemd/system/multi-user.target.wants/*;\
@@ -54,9 +58,11 @@ RUN mkdir -p /etc/pki/ca-trust/source/SAP
 COPY files/certs/*.cer /etc/pki/ca-trust/source/SAP/
 
 # Install PyRFC
-RUN pip install --upgrade pip
-RUN cd /var/tmp && curl -LO https://github.com/SAP/PyRFC/raw/master/dist/pyrfc-1.9.93-cp27-cp27mu-linux_x86_64.whl && \
-    pip install /var/tmp/pyrfc-1.9.93-cp27-cp27mu-linux_x86_64.whl && rm -f /var/tmp/pyrfc-1.9.93-cp27-cp27mu-linux_x86_64.whl
+RUN pip install --upgrade pip && \
+    cd /var/tmp &&\
+    curl -LO https://github.com/SAP/PyRFC/releases/download/1.9.99/pyrfc-1.9.99-cp27-cp27mu-linux_x86_64.whl&& \
+    pip install  /var/tmp/pyrfc-1.9.99-cp27-cp27mu-linux_x86_64.whl && \
+    rm -f /var/tmp/pyrfc-1.9.99-cp27-cp27mu-linux_x86_64.whl
 
 # Install the utility for adding trusted certs over RFC
 COPY utils/src/sap_add_trusted_server_cert /usr/local/bin

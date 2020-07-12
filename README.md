@@ -35,29 +35,33 @@ The only thing you need to do to enable abapGit is to install it.
 
 0. Download your version of [SAP NetWeaver ABAP 7.5x Developer Edition from SAP](https://tools.hana.ondemand.com/#abap). The files are compressed (RAR). Un-compress them into a folder named NW752. The folder must be at the same location where your Dockerfile is.
 
+```sh
+$ unrar x TD752SP04part01.rar NW752/
+```
+
 1. Set up docker on your instance
 
 ```sh
-docker daemon --storage-opt dm.basesize=60G
+$ docker daemon --storage-opt dm.basesize=60G
 ```
 
 2. Build the Docker image
 
 ```sh
-docker build -v $PWD/NW752:/var/tmp/ABAP_Trial/NW752 -v $PWD/mock_hostname/ld.so.preload:/etc/ld.so.preload -v $PWD/mock_hostname/libmockhostname.so:/usr/local/lib64/libmockhostname.so -t abaptrial:752 .
+$ docker build -t abaptrial:752 .
 ```
 
 3. Start the Docker container
 
 ```sh
-docker run -d -v /sys/fs/cgroup:/sys/fs/cgroup:ro -p 3200:3200 -p 3300:3300 -p 8000:8000 -p 44300:44300 -h vhcalnplci --name testdrive abaptrial:752
+$ docker run -d -v /sys/fs/cgroup:/sys/fs/cgroup:ro -p 3200:3200 -p 3300:3300 -p 8000:8000 -p 44300:44300 -h vhcalnplci --name testdrive abaptrial:752
 ```
 
 or alternatively, use docker-compose (only to start the container, build is not
 possible because of missing bind mounts).
 
 ```sh
-docker-compose up -d
+$ docker-compose up -d
 ```
 
 4. Done. NetWeaver ABAP is installed and ready to be used. Users, credentials, etc can be found in the fie readme.html shipped with the NetWeaver ABAP RAR files.
